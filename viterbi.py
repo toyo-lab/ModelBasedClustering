@@ -1,4 +1,5 @@
 import HMM
+import random
 
 class Viterbi:
     def __init__(self, hmm):
@@ -31,6 +32,7 @@ class Viterbi:
                         max_delta_t_q = delta_t_q
                         max_psi_t_q = o_q
                 delta_t.append(max_delta_t_q * self.hmm.b[q][o])
+                assert max_psi_t_q != None
                 psi_t.append(max_psi_t_q)
 
             delta.append(delta_t)
@@ -39,7 +41,7 @@ class Viterbi:
 
         max_delta_last = 0
         for qi, e in enumerate(delta[-1]):
-            if max_delta_last < e:
+            if max_delta_last <= e:
                 max_delta_last = e
                 q = qi
         p = max_delta_last
@@ -57,9 +59,11 @@ if __name__ == '__main__':
 
     #coin_hmm = HMM.HMM((0.5, 0.5, 0.0, 0.0), ((0.5, 0.3, 0.1, 0.1), (0.1, 0.4, 0.1, 0.4), (0.2, 0.4, 0.2, 0.2), (0.1, 0.5, 0.2, 0.2)), ((0.2, 0.8), (0.4, 0.6), (0.7, 0.3), (0.6, 0.4)), ('H', 'T'))
 
-    q_lst , o_lst = coin_hmm.simulate(10)
-    q_lst = [1, 0, 0, 0, 0, 1, 0, 0, 1, 1] 
-    o_lst = [0, 1, 0, 1, 1, 0, 1, 1, 0, 0]
+    # あまり長い列にすると値が小さくなりすぎて全部０になる。
+    n = 128
+    q_lst , o_lst = coin_hmm.simulate(n)
+    #q_lst = [1, 0, 0, 0, 0, 1, 0, 0, 1, 1] 
+    #o_lst = [0, 1, 0, 1, 1, 0, 1, 1, 0, 0]
     d_lst = coin_hmm.translate(o_lst)
     print(d_lst)
     #print(q_lst, o_lst)
@@ -72,4 +76,14 @@ if __name__ == '__main__':
     for q, v_q in zip(q_lst, v_q_lst):
         if ( q == v_q ) :
             sum += 1
-    print(sum / len(v_q_lst))
+    print(sum / n)
+
+    r_q_lst = [None] * n
+    for i in range(n):
+        r_q_lst[i] = int(random.random() * 2)
+
+    sum = 0
+    for q, r_q in zip(q_lst, r_q_lst):
+        if ( q == r_q ) :
+            sum += 1
+    print(sum / n)
